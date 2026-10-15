@@ -1,0 +1,8 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.14.1+cpu
+transformers==5.19.0
+streamlit
+pillow
+pandas
+prometheus-client
+psutil
