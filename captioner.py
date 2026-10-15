@@ -1,4 +1,3 @@
-"""Model loading and instrumented inference."""
 import platform
 import time
 
@@ -13,7 +12,6 @@ MODEL_NAME = "Salesforce/blip-image-captioning-base"
 
 
 def load_model():
-    """Load BLIP on CPU. In the app this is wrapped in st.cache_resource."""
     start = time.perf_counter()
     processor = BlipProcessor.from_pretrained(MODEL_NAME)
     model = BlipForConditionalGeneration.from_pretrained(MODEL_NAME)
@@ -35,7 +33,6 @@ def load_model():
 
 def caption_image(processor, model, image: Image.Image, mode: str,
                   client_ip: str, session_id: str, size_bytes: int = 0) -> str:
-    """Caption one image and record metrics for it."""
     try:
         image = image.convert("RGB")
         m.IMAGE_PIXELS.labels(mode=mode).observe(image.width * image.height)

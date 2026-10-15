@@ -1,5 +1,5 @@
 global:
-  scrape_interval: 5s       # matches the 5s dashboard refresh in the assignment
+  scrape_interval: 5s      
   evaluation_interval: 5s
 
 rule_files:
@@ -9,15 +9,11 @@ scrape_configs:
   - job_name: prometheus
     static_configs:
       - targets: ["localhost:9090"]
-
-  # The Streamlit app's prometheus_client endpoint (separate port from the UI)
   - job_name: caption_app
     static_configs:
       - targets: ["localhost:8000"]
         labels:
           service: image-captioning
-
-  # System metrics: CPU / RAM / disk, used to correlate with bulk uploads
   - job_name: node
     static_configs:
       - targets: ["localhost:9100"]

@@ -1,7 +1,7 @@
 services:
   prometheus:
     image: prom/prometheus:latest
-    network_mode: host            # Prometheus on :9090
+    network_mode: host           
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./alerts.yml:/etc/prometheus/alerts.yml:ro
@@ -13,7 +13,7 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    network_mode: host            # Grafana on :3000
+    network_mode: host           
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin

@@ -1,28 +1,24 @@
 groups:
   - name: caption-monitoring
     rules:
-      # AI-assisted. Prompt: "<replace with your prompt>"
       - alert: CaptionAppDown
         expr: up{job="caption_app"} == 0
         for: 15s
         labels: {severity: critical}
         annotations: {summary: "Captioning app is not reachable"}
 
-      # AI-assisted. Prompt: "<replace with your prompt>"
       - alert: HighInferenceLatencyP95
         expr: histogram_quantile(0.95, sum by (le) (rate(caption_inference_duration_seconds_bucket[1m]))) > 5
         for: 30s
         labels: {severity: warning}
         annotations: {summary: "p95 inference latency above 5s"}
 
-      # AI-assisted. Prompt: "<replace with your prompt>"
       - alert: HostCPUHigh
         expr: 100 - avg(rate(node_cpu_seconds_total{mode="idle"}[1m])) * 100 > 90
         for: 1m
         labels: {severity: warning}
         annotations: {summary: "Host CPU above 90%"}
 
-      # AI-assisted. Prompt: "<replace with your prompt>"
       - alert: CaptionErrorsDetected
         expr: sum(increase(caption_errors_total[5m])) > 0
         labels: {severity: warning}

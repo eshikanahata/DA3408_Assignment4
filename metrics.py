@@ -1,8 +1,3 @@
-"""All Prometheus metric definitions for the captioning app.
-
-Defined once at import time. Python caches imported modules, so Streamlit's
-script reruns do NOT redefine these (that would raise "Duplicated timeseries").
-"""
 import time
 from contextlib import contextmanager
 
@@ -15,8 +10,6 @@ from prometheus_client import (Counter, Gauge, Histogram, Info, Summary,
 disable_created_metrics()  
 MODES = ("single", "bulk")
 
-# ----------------------------- Counters -----------------------------
-# NOTE: prometheus_client appends "_total" to Counter names automatically.
 IMAGES_PROCESSED = Counter(
     "caption_images_processed", "Images captioned, by mode and outcome",
     ["mode", "status"])
@@ -36,7 +29,6 @@ WORDS = Counter(
 ZIP_SKIPPED = Counter(
     "caption_zip_skipped_files", "Files skipped inside uploaded ZIPs", ["reason"])
 
-# ------------------------------ Gauges ------------------------------
 ACTIVE_REQUESTS = Gauge(
     "caption_active_requests", "Requests currently being processed", ["mode"])
 BULK_PENDING = Gauge(
@@ -52,9 +44,8 @@ MODEL_MEMORY_BYTES = Gauge(
 APP_START = Gauge("caption_app_start_time_seconds", "Unix time the app started")
 APP_START.set_to_current_time()
 
-# Evaluated at scrape time, so they are always fresh.
 _proc = psutil.Process()
-_proc.cpu_percent(interval=None)  # prime the counter; first call returns 0
+_proc.cpu_percent(interval=None) 
 PROCESS_RSS = Gauge("caption_process_rss_bytes", "Resident memory of the app process")
 PROCESS_RSS.set_function(lambda: _proc.memory_info().rss)
 PROCESS_CPU = Gauge(
@@ -64,7 +55,6 @@ PROCESS_CPU.set_function(lambda: _proc.cpu_percent(interval=None))
 
 APP_INFO = Info("caption_app", "Static application metadata")
 
-# ---------------------------- Histograms ----------------------------
 INFERENCE_SECONDS = Histogram(
     "caption_inference_duration_seconds", "Model generate() time per image",
     ["mode"], buckets=(0.25, 0.5, 0.75, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.75, 2, 3, 5, 8, 13, 20))
@@ -78,8 +68,6 @@ BULK_BATCH_SIZE = Histogram(
     "caption_bulk_batch_size_images", "Images per bulk ZIP",
     buckets=(1, 2, 5, 10, 20, 50, 100))
 
-# ----------------------------- Summaries ----------------------------
-# Python's Summary exposes only <name>_count and <name>_sum (no quantiles).
 PREPROCESS_SECONDS = Summary(
     "caption_preprocess_duration_seconds", "Image preprocessing time", ["mode"])
 CAPTION_CHARS = Summary(
@@ -87,8 +75,6 @@ CAPTION_CHARS = Summary(
 IMAGE_PIXELS = Summary(
     "caption_image_pixels", "Pixel count of input images", ["mode"])
 
-# Pre-create label combinations so series exist (at 0) from startup.
-# Without this, rate() and "no data" panels misbehave until first use.
 for _m in MODES:
     INFERENCE_SECONDS.labels(mode=_m)
     REQUEST_SECONDS.labels(mode=_m)
@@ -108,7 +94,6 @@ BULK_PROGRESS.set(0)
 
 @contextmanager
 def track_request(mode, client_ip, session_id):
-    """Wrap one user action (a single upload or a whole ZIP)."""
     REQUESTS.labels(mode=mode, client_ip=client_ip, session_id=session_id).inc()
     ACTIVE_REQUESTS.labels(mode=mode).inc()
     start = time.perf_counter()
@@ -123,7 +108,6 @@ _server_started = False
 
 
 def start_metrics_server(port=8000):
-    """Expose /metrics on a separate port. Safe to call more than once."""
     global _server_started
     if not _server_started:
         start_http_server(port)

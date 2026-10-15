@@ -1,4 +1,3 @@
-"""Streamlit UI: single and bulk (ZIP) image captioning, fully instrumented."""
 import io
 import time
 import uuid
@@ -15,22 +14,20 @@ st.set_page_config(page_title="CPU Image Captioning", layout="wide")
 
 METRICS_PORT = 8000
 IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".webp", ".bmp")
-MAX_ZIP_IMAGES = 100               # guard against huge batches on CPU
-MAX_IMAGE_BYTES = 10 * 1024 * 1024  # skip files over 10 MB
+MAX_ZIP_IMAGES = 100              
+MAX_IMAGE_BYTES = 10 * 1024 * 1024  
 
 
 @st.cache_resource(show_spinner="Loading model (first run only)...")
 def init():
-    """Runs once per process: start /metrics server and load the model."""
     m.start_metrics_server(METRICS_PORT)
     return c.load_model()
 
 
 processor, model = init()
 
-# ---------------------------- client metadata ----------------------------
 if "sid" not in st.session_state:
-    st.session_state.sid = uuid.uuid4().hex[:8]  # truncated: limits cardinality
+    st.session_state.sid = uuid.uuid4().hex[:8]  
 SID = st.session_state.sid
 
 
@@ -51,12 +48,9 @@ IP = get_client_ip()
 
 
 def record_failure(mode: str, exc: Exception):
-    """For failures that happen before caption_image() (bad file, bad ZIP)."""
     m.IMAGES_PROCESSED.labels(mode=mode, status="error").inc()
     m.ERRORS.labels(mode=mode, error_type=type(exc).__name__).inc()
 
-
-# ------------------------------- single mode -------------------------------
 def run_single(file):
     data = file.getvalue()
     with m.track_request("single", IP, SID):
@@ -75,7 +69,6 @@ def run_single(file):
             return None
 
 
-# -------------------------------- bulk mode --------------------------------
 def run_bulk(zfile):
     rows = []
     with m.track_request("bulk", IP, SID):
@@ -139,8 +132,6 @@ def run_bulk(zfile):
             m.BULK_PENDING.set(0)
     return rows
 
-
-# ----------------------------------- UI -----------------------------------
 st.title("CPU Image Captioning")
 st.caption(f"Model: {c.MODEL_NAME} | metrics on port {METRICS_PORT} | session {SID}")
 
