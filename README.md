@@ -112,5 +112,5 @@ The 7 Commandments:
 ## AI usage (Code of Conduct)
 
 PromQL for the dashboard and alert rules was written with AI assistance. The
-prompts are recorded in `PROMQL_ATTRIBUTION.md` and as comments in `alerts.yml`.
+prompts are recorded in `AI_DISCLOSURE.md` and as comments in `alerts.yml`.
 I verified the metric logic by hand against raw `/metrics` output.
